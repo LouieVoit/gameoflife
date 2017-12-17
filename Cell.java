@@ -9,61 +9,65 @@ import java.util.List;
  * @author Loux
  */
 public class Cell {
+
     public static enum State {
         Alive("A"), Dead("D");
-        
+
         private final String name_;
 
         private State(String name) {
             this.name_ = name;
         }
-        
+
         @Override
         public String toString() {
             return name_;
         }
     }
-    
+
     private final List<Cell> neighbours_;
     private int currentState_;
     private List<State> life_;
-    
+
     public Cell() {
         neighbours_ = new ArrayList<>();
         currentState_ = 0;
-        life_=new ArrayList<>();
+        life_ = new ArrayList<>();
         life_.add(Dead);
     }
-    
+
     public void addNeighbour(Cell neighbour) {
         neighbours_.add(neighbour);
     }
+
+    public State setState(State state) {
+        return (life_.set(currentState_, state));
+    }
     
-    public void computeNextState(Strategy strategy) {
-        State nextState = strategy.nextState(this);
+    public State getState() {
+        return life_.get(currentState_);
+    }
+
+    public void setNextState(State nextState) {
         life_.add(nextState);
     }
     
-    public int tick() {
-        return (currentState_++);
+    public void evolve() {
+        currentState_ = currentState_ + 1;
     }
     
-    public State getCurrentState() {
-        return life_.get(currentState_);
+    public void regress() {
+        currentState_ = currentState_ - 1;
     }
-    
-    public void setCurrentState(State state) {
-        life_.set(currentState_, state);
-    }
-    
+
     public boolean isAlive() {
-        return (getCurrentState().equals(State.Alive));
+        return (life_.get(currentState_).equals(State.Alive));
     }
-    
+
     public boolean isDead() {
-        return (getCurrentState().equals(State.Dead));
+        return (life_.get(currentState_).equals(State.Dead));
     }
-    
+
     public int getNumberOfAliveNeighbours() {
         int result = 0;
         for (Cell neighbour : neighbours_) {
@@ -73,15 +77,14 @@ public class Cell {
         }
         return result;
     }
-    
+
     public int getNumberOfDeadNeighbours() {
         return (neighbours_.size() - getNumberOfAliveNeighbours());
     }
-    
-    
+
     @Override
     public String toString() {
-        return getCurrentState().toString();
+        return life_.get(currentState_).toString();
     }
-    
+
 }

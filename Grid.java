@@ -1,10 +1,14 @@
 package gameoflife;
 
+import gameoflife.Cell.State;
+import java.awt.Graphics;
+import javax.swing.JPanel;
+
 /**
  *
  * @author Loux
  */
-public class Grid {
+public class Grid extends JPanel {
     
     private final Geometry geometry_;
     
@@ -12,16 +16,19 @@ public class Grid {
         geometry_ = geometry;
     }
     
-    public void computeNextGeneration(Strategy strategy) {
+    public void nextGeneration(Strategy strategy) {
         for (Cell cell : geometry_) {
-            cell.computeNextState(strategy);
+            State nextState = strategy.nextState(cell);
+            cell.setNextState(nextState);
+        }
+        for (Cell cell : geometry_) {
+            cell.evolve();
         }
     }
     
-    public void tick() {
-        for (Cell cell : geometry_) {
-            cell.tick();
-        }
+    @Override
+    public void paint(Graphics g){
+        geometry_.paint(g);
     }
     
     @Override

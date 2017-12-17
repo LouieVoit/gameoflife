@@ -17,7 +17,7 @@ public abstract class Strategy {
         @Override
         public State nextState(Cell cell) {
             int numberOfAliveNeighbours = cell.getNumberOfAliveNeighbours();
-            State result = cell.getCurrentState();
+            State result = cell.getState();
             switch (result) {
                 case Alive:
                     if (numberOfAliveNeighbours < 2) {

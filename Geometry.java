@@ -1,21 +1,22 @@
 package gameoflife;
 
-import java.util.ArrayList;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+import javax.swing.JPanel;
 
 /**
  *
  * @author Loux
  */
-public interface Geometry extends Iterable<Cell> {
+public abstract class Geometry extends JPanel implements Iterable<Cell> {
 
-    public static class Square implements Geometry {
+    public static class Square extends Geometry {
 
         private final int nbRows_;
-        private Cell[][] square_;
+        private final Cell[][] square_;
 
         public Square(int nbRows) {
             nbRows_ = nbRows;
@@ -97,9 +98,32 @@ public interface Geometry extends Iterable<Cell> {
                 for (int j = 0; j < nbRows_; j++) {
                     double rndm = Math.random();
                     if (rndm < 0.5) {
-                        square_[i][j].setCurrentState(Cell.State.Alive);
+                        square_[i][j].setState(Cell.State.Alive);
                     }
                 }
+            }
+        }
+
+        @Override
+        public void paint(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2D = (Graphics2D) g;
+            g2D.setPaint(Color.GRAY);
+            int size = 30;
+            for (int i = 0; i < nbRows_; i++) {
+                for (int j = 0; j < nbRows_; j++) {
+                    int x = i * size;
+                    int y = j * size;
+                    Cell cell = square_[i][j];
+                    if (cell.isAlive()) {
+                        g2D.setPaint(Color.RED);
+                    } else {
+                        g2D.setPaint(Color.BLACK);
+                    }
+                    g2D.drawRect(x, y, size, size);
+                    g2D.fillRect(x, y, size, size);
+                }
+                
             }
         }
 
