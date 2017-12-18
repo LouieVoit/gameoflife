@@ -26,6 +26,18 @@ public class Grid extends JPanel {
         }
     }
     
+    public void evolve(){
+        for (Cell cell : geometry_) {
+            cell.evolve();
+        }
+    }
+    
+    public void regress(){
+        for (Cell cell : geometry_) {
+            cell.regress();
+        }
+    }
+    
     @Override
     public void paint(Graphics g){
         geometry_.paint(g);

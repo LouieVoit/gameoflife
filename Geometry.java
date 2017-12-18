@@ -109,16 +109,16 @@ public abstract class Geometry extends JPanel implements Iterable<Cell> {
             super.paintComponent(g);
             Graphics2D g2D = (Graphics2D) g;
             g2D.setPaint(Color.GRAY);
-            int size = 30;
+            int size = 10;
             for (int i = 0; i < nbRows_; i++) {
                 for (int j = 0; j < nbRows_; j++) {
                     int x = i * size;
                     int y = j * size;
                     Cell cell = square_[i][j];
                     if (cell.isAlive()) {
-                        g2D.setPaint(Color.RED);
-                    } else {
                         g2D.setPaint(Color.BLACK);
+                    } else {
+                        g2D.setPaint(Color.WHITE);
                     }
                     g2D.drawRect(x, y, size, size);
                     g2D.fillRect(x, y, size, size);
