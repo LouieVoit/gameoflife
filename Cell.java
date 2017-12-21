@@ -26,14 +26,11 @@ public class Cell {
     }
 
     private final List<Cell> neighbours_;
-    private int currentState_;
-    private List<State> life_;
+    private State state_, nextState_;
 
     public Cell() {
         neighbours_ = new ArrayList<>();
-        currentState_ = 0;
-        life_ = new ArrayList<>();
-        life_.add(Dead);
+        state_ = Dead;
     }
 
     public void addNeighbour(Cell neighbour) {
@@ -41,31 +38,28 @@ public class Cell {
     }
 
     public State setState(State state) {
-        return (life_.set(currentState_, state));
-    }
-    
-    public State getState() {
-        return life_.get(currentState_);
+        State previousState = state_;
+        state_ = state;
+        return previousState;
     }
 
-    public void setNextState(State nextState) {
-        life_.add(nextState);
+    public State getState() {
+        return state_;
     }
-    
-    public void evolve() {
-        currentState_ = currentState_ + 1;
+
+    public void setNextState(State state) {
+        nextState_ = state;
     }
-    
-    public void regress() {
-        currentState_ = currentState_ - 1;
+
+    public boolean evolve() {
+        boolean hasEvolved = (!state_.equals(nextState_));
+        state_ = nextState_;
+        nextState_ = null;
+        return hasEvolved;
     }
 
     public boolean isAlive() {
-        return (life_.get(currentState_).equals(State.Alive));
-    }
-
-    public boolean isDead() {
-        return (life_.get(currentState_).equals(State.Dead));
+        return getState().equals(State.Alive);
     }
 
     public int getNumberOfAliveNeighbours() {
@@ -78,13 +72,12 @@ public class Cell {
         return result;
     }
 
-    public int getNumberOfDeadNeighbours() {
-        return (neighbours_.size() - getNumberOfAliveNeighbours());
+    public int getNumberOfNeighbours() {
+        return (neighbours_.size());
     }
 
     @Override
     public String toString() {
-        return life_.get(currentState_).toString();
+        return state_.toString();
     }
-
 }

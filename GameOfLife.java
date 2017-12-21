@@ -1,99 +1,52 @@
 package gameoflife;
 
-import gameoflife.Geometry.Square;
+import gameoflife.Cell.State;
+import java.awt.Graphics;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JPanel;
 
 /**
  *
  * @author Loux
  */
-public class GameOfLife extends javax.swing.JFrame {
+public class GameOfLife {
 
-    public GameOfLife() {
-        initComponents();
+    private final Geometry geometry_;
+
+    public GameOfLife(Geometry geometry) {
+        geometry_ = geometry;
     }
 
-    private javax.swing.JButton tickButton_;
-    private javax.swing.JButton regressButton_;
-    private Grid grid_;
-
-    private void initComponents() {
-        tickButton_ = new javax.swing.JButton();
-        regressButton_ = new javax.swing.JButton();
-        Square geometry = new Geometry.Square(20);
-        geometry.setRandomInitialSeed();
-        grid_ = new Grid(geometry);
-
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-
-        tickButton_.setText("tick");
-        tickButton_.addActionListener((java.awt.event.ActionEvent evt) -> {
-            jToggleTickButtonActionPerformed(evt);
-        });
-        
-        regressButton_.setText("reverse");
-        regressButton_.addActionListener((java.awt.event.ActionEvent evt) -> {
-            jToggleRegressButtonActionPerformed(evt);
-        });
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(grid_);
-        grid_.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 320, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 255, Short.MAX_VALUE)
-        );
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(tickButton_)
-                                        .addComponent(regressButton_)
-                                        .addComponent(grid_, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(0, 80, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(layout.createSequentialGroup()
-                                .addComponent(tickButton_)
-                                .addComponent(regressButton_)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(grid_, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addContainerGap())
-        );
-
-        pack();
+    public void setRandomInitialSeed() {
+        for (Cell cell : geometry_) {
+            double rndm = Math.random();
+            if (rndm < 0.5) {
+                cell.setState(Cell.State.Alive);
+            }
+        }
     }
 
-    private void jToggleTickButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        Strategy strategy = new Strategy.Default();
-        grid_.nextGeneration(strategy);
-        grid_.repaint();
+    public boolean nextGeneration(Strategy strategy) {
+        for (Cell cell : geometry_) {
+            State nextState = strategy.nextState(cell);
+            cell.setNextState(nextState);
+        }
+        boolean hasEvolved = false;
+        for (Cell cell : geometry_) {
+            hasEvolved |= cell.evolve();
+        }
+        return hasEvolved;
     }
     
-    private void jToggleRegressButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        grid_.regress();
-        grid_.repaint();
+    public Geometry getGeometry() {
+        return geometry_;
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                GameOfLife gol = new GameOfLife();
-                gol.setVisible(true);
-            }
-        });
+    @Override
+    public String toString() {
+        return geometry_.toString();
     }
 
 }

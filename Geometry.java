@@ -11,16 +11,14 @@ import javax.swing.JPanel;
  *
  * @author Loux
  */
-public abstract class Geometry extends JPanel implements Iterable<Cell> {
+public abstract class Geometry implements Iterable<Cell> {
+
+    protected Cell[][] cells_;
 
     public static class Square extends Geometry {
 
-        private final int nbRows_;
-        private final Cell[][] square_;
-
         public Square(int nbRows) {
-            nbRows_ = nbRows;
-            square_ = constructCells(nbRows);
+            cells_ = constructCells(nbRows);
         }
 
         private Cell[][] constructCells(int nbRows) {
@@ -92,74 +90,43 @@ public abstract class Geometry extends JPanel implements Iterable<Cell> {
             cells[nbRows - 1][nbRows - 1].addNeighbour(cells[nbRows - 1][nbRows - 2]);
             return cells;
         }
+    }
 
-        public void setRandomInitialSeed() {
-            for (int i = 0; i < nbRows_; i++) {
-                for (int j = 0; j < nbRows_; j++) {
-                    double rndm = Math.random();
-                    if (rndm < 0.5) {
-                        square_[i][j].setState(Cell.State.Alive);
-                    }
-                }
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        for (int ind = 0; ind < cells_.length; ind++) {
+            builder.append(Arrays.toString(cells_[ind]));
+            builder.append("\n");
+        }
+        return builder.toString();
+    }
+    
+    public Cell[][] getCells() {
+        return cells_.clone();
+    }
+
+    @Override
+    public Iterator<Cell> iterator() {
+        Iterator<Cell> iterator = new Iterator<Cell>() {
+            private int i_ = 0, j_ = 0;
+
+            @Override
+            public boolean hasNext() {
+                return !(i_ == cells_.length - 1 && j_ == cells_[i_].length - 1);
             }
-        }
 
-        @Override
-        public void paint(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2D = (Graphics2D) g;
-            g2D.setPaint(Color.GRAY);
-            int size = 10;
-            for (int i = 0; i < nbRows_; i++) {
-                for (int j = 0; j < nbRows_; j++) {
-                    int x = i * size;
-                    int y = j * size;
-                    Cell cell = square_[i][j];
-                    if (cell.isAlive()) {
-                        g2D.setPaint(Color.BLACK);
-                    } else {
-                        g2D.setPaint(Color.WHITE);
-                    }
-                    g2D.drawRect(x, y, size, size);
-                    g2D.fillRect(x, y, size, size);
+            @Override
+            public Cell next() {
+                Cell next = cells_[i_][j_];
+                j_ = (j_ + 1) % cells_[i_].length;
+                if (j_ == 0) {
+                    i_ = (i_ + 1);
                 }
-                
+                return (next);
             }
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder();
-            for (int ind = 0; ind < nbRows_; ind++) {
-                builder.append(Arrays.toString(square_[ind]));
-                builder.append("\n");
-            }
-            return builder.toString();
-        }
-
-        @Override
-        public Iterator<Cell> iterator() {
-            Iterator<Cell> iterator = new Iterator<Cell>() {
-                private int i_ = 0, j_ = 0;
-
-                @Override
-                public boolean hasNext() {
-                    return !(i_ == nbRows_ - 1 && j_ == nbRows_ - 1);
-                }
-
-                @Override
-                public Cell next() {
-                    Cell next = square_[i_][j_];
-                    j_ = (j_ + 1) % nbRows_;
-                    if (j_ == 0) {
-                        i_ = (i_ + 1) % nbRows_;
-                    }
-                    return (next);
-                }
-            };
-            return iterator;
-        }
-
+        };
+        return iterator;
     }
 
 }
