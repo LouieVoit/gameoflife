@@ -1,11 +1,6 @@
 package gameoflife;
 
 import gameoflife.Cell.State;
-import java.awt.Graphics;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JPanel;
 
 /**
  *
@@ -13,9 +8,9 @@ import javax.swing.JPanel;
  */
 public class GameOfLife {
 
-    private final Geometry geometry_;
-
-    public GameOfLife(Geometry geometry) {
+    private Geometry geometry_;
+    
+    public void setGeometry(Geometry geometry) {
         geometry_ = geometry;
     }
 

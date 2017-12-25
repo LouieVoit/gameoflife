@@ -1,11 +1,8 @@
 package gameoflife;
 
-import gameoflife.Geometry.Square;
 import java.awt.FlowLayout;
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -13,6 +10,7 @@ import java.util.logging.Logger;
 import javax.swing.JPanel;
 import static javax.swing.SwingUtilities.invokeLater;
 import javax.swing.SwingWorker;
+import javax.swing.plaf.basic.BasicSliderUI;
 
 /**
  *
@@ -20,127 +18,175 @@ import javax.swing.SwingWorker;
  */
 public class GameOfLifeGUI extends javax.swing.JFrame {
 
+    private final GameOfLife gol_;
+    private javax.swing.JButton initButton_, tickButton_, playButton_, stopButton_, exitButton_;
+    private javax.swing.JSlider sizeSlider_;
+    private JPanel golPanel_;
+
     public GameOfLifeGUI() {
         initComponents();
+        gol_ = new GameOfLife();
     }
 
     private void initComponents() {
-        javax.swing.JButton playButton = new javax.swing.JButton();
-        javax.swing.JButton stopButton = new javax.swing.JButton();
-
-        playButton.setText("Play");
-        playButton.addActionListener((java.awt.event.ActionEvent evt) -> {
+        initButton_ = new javax.swing.JButton();
+        tickButton_ = new javax.swing.JButton();
+        playButton_ = new javax.swing.JButton();
+        stopButton_ = new javax.swing.JButton();
+        exitButton_ = new javax.swing.JButton();
+        sizeSlider_ = new javax.swing.JSlider(JSlider.HORIZONTAL, 5, 100, 20);
+        initButton_.setText("Init");
+        initButton_.addActionListener((java.awt.event.ActionEvent evt) -> {
+            jToggleInitButtonActionPerformed(evt);
+        });
+        tickButton_.setText("Tick");
+        tickButton_.addActionListener((java.awt.event.ActionEvent evt) -> {
+            jToggleTickButtonActionPerformed(evt);
+        });
+        playButton_.setText("Play");
+        playButton_.addActionListener((java.awt.event.ActionEvent evt) -> {
             jTogglePlayButtonActionPerformed(evt);
         });
-
-        stopButton.setText("Stop");
-        stopButton.addActionListener((java.awt.event.ActionEvent evt) -> {
+        stopButton_.setText("Stop");
+        stopButton_.addActionListener((java.awt.event.ActionEvent evt) -> {
             jToggleStopButtonActionPerformed(evt);
         });
+        exitButton_.setText("Exit");
+        exitButton_.addActionListener((java.awt.event.ActionEvent evt) -> {
+            jToggleExitButtonActionPerformed(evt);
+        });
+        final JPanel buttons = new JPanel(new FlowLayout());
+        buttons.add(initButton_);
+        buttons.add(tickButton_);
+        buttons.add(playButton_);
+        buttons.add(stopButton_);
+        buttons.add(exitButton_);
+        buttons.add(sizeSlider_);
+        buttons.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
 
-        FlowLayout flowLayout = new FlowLayout();
-        final JPanel buttons = new JPanel();
-        buttons.setLayout(flowLayout);
-        flowLayout.setAlignment(FlowLayout.TRAILING);
-        buttons.add(playButton);
-        buttons.add(stopButton);
-        buttons.setComponentOrientation(
-                ComponentOrientation.LEFT_TO_RIGHT);
+        golPanel_ = new JPanel();
+        golPanel_.setPreferredSize(new Dimension(800, 800));
 
-        add(buttons, BorderLayout.WEST);
+        add(buttons, BorderLayout.SOUTH);
+        add(golPanel_, BorderLayout.CENTER);
 
-        golPanel = new JPanel();
-        add(golPanel, BorderLayout.CENTER);
+        setResizable(false);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        pack();
     }
 
-    JPanel golPanel;
+    private abstract class GameOfLifeSwingWorker extends SwingWorker<Integer, Cell[][]> {
+
+        @Override
+        protected void process(java.util.List<Cell[][]> chunks) {
+            Graphics2D g = (Graphics2D) golPanel_.getGraphics();
+            g.setPaint(Color.GRAY);
+            int size = (int) golPanel_.getPreferredSize().getWidth() / gol_.getGeometry().getWidth();
+            for (Cell[][] cells_ : chunks) {
+                for (int i = 0; i < cells_.length; i++) {
+                    for (int j = 0; j < cells_[i].length; j++) {
+                        int x = i * size;
+                        int y = j * size;
+                        Cell cell = cells_[i][j];
+                        if (cell.isAlive()) {
+                            g.setPaint(Color.YELLOW);
+                        } else {
+                            g.setPaint(Color.WHITE);
+                        }
+                        g.fillRect(x, y, size, size);
+                    }
+
+                }
+            }
+        }
+
+        @Override
+        protected void done() {
+            try {
+                if (!isCancelled()) {
+                    System.out.println(get());
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                Logger.getLogger(GameOfLifeGUI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private GameOfLifeSwingWorker worker_;
+    private int it_ = 0;
+
+    private void jToggleInitButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        worker_ = new GameOfLifeSwingWorker() {
+
+            @Override
+            protected Integer doInBackground() throws Exception {
+                it_ = 0;
+                gol_.setGeometry(new Geometry.Square(sizeSlider_.getValue()));
+                System.out.println(sizeSlider_.getValue());
+                gol_.setRandomInitialSeed();
+                publish(gol_.getGeometry().getCells());
+                return it_;
+            }
+
+        };
+        worker_.execute();
+    }
+
+    private void jToggleTickButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        worker_ = new GameOfLifeSwingWorker() {
+
+            @Override
+            protected Integer doInBackground() throws Exception {
+                it_ ++;
+                gol_.nextGeneration(new Strategy.Default());
+                publish(gol_.getGeometry().getCells());
+                return it_;
+            }
+
+        };
+        worker_.execute();
+    }
 
     private void jTogglePlayButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        if (worker == null) {
-            worker = new SwingWorker<Integer, Cell[][]>() {
-                private final GameOfLife gol_;
+        if (worker_ != null) {
+            jToggleStopButtonActionPerformed(evt);
+        }
+        worker_ = new GameOfLifeSwingWorker() {
 
-                {
-                    Square geometry = new Geometry.Square(100);
-                    gol_ = new GameOfLife(geometry);
-                    gol_.setRandomInitialSeed();
+            @Override
+            protected Integer doInBackground() throws Exception {
+                boolean isEvolving = true;
+                while (!isCancelled() && isEvolving) {
+                    isEvolving = gol_.nextGeneration(new Strategy.Default());
+                    publish(gol_.getGeometry().getCells());
+                    TimeUnit.MILLISECONDS.sleep(100);
+                    it_++;
                 }
+                return it_;
+            }
 
-                @Override
-                protected Integer doInBackground() throws Exception {
-                    int it = 0;
-                    boolean isEvolving = true;
-                    while (!isCancelled() && isEvolving) {
-                        isEvolving = gol_.nextGeneration(new Strategy.Default());
-                        publish(gol_.getGeometry().getCells());
-                        TimeUnit.MILLISECONDS.sleep(100);
-                        it++;
-                    }
-                    return it;
-                }
+        };
+        worker_.execute();
+    }
 
-                @Override
-                protected void process(java.util.List<Cell[][]> chunks) {
-                    for (Cell[][] cells_ : chunks) {
-                        Graphics2D g = (Graphics2D) golPanel.getGraphics();
-                        g.setPaint(Color.GRAY);
-                        int size = 10;
-                        for (int i = 0; i < cells_.length; i++) {
-                            for (int j = 0; j < cells_[i].length; j++) {
-                                int x = i * size;
-                                int y = j * size;
-                                Cell cell = cells_[i][j];
-                                if (cell.isAlive()) {
-                                    g.setPaint(Color.YELLOW);
-                                } else {
-                                    g.setPaint(Color.WHITE);
-                                }
-                                g.drawRect(x, y, size, size);
-                                g.fillRect(x, y, size, size);
-                            }
-
-                        }
-                    }
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        if (!isCancelled()) {
-                            System.out.println(get());
-                        }
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(GameOfLifeGUI.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (ExecutionException ex) {
-                        Logger.getLogger(GameOfLifeGUI.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-            };
-            worker.execute();
+    private void jToggleStopButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        if (worker_ != null) {
+            worker_.cancel(true);
+            worker_ = null;
         }
     }
 
-    private SwingWorker worker;
-
-    private void jToggleStopButtonActionPerformed(java.awt.event.ActionEvent evt) {
-        if (worker != null) {
-            worker.cancel(true);
-            worker = null;
-        }
+    private void jToggleExitButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        System.exit(1);
     }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        invokeLater(new Runnable() {
-            public void run() {
-                GameOfLifeGUI frame = new GameOfLifeGUI();
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setVisible(true);
-            }
+        invokeLater(() -> {
+            (new GameOfLifeGUI()).setVisible(true);
         });
     }
 

@@ -90,6 +90,16 @@ public abstract class Geometry implements Iterable<Cell> {
             cells[nbRows - 1][nbRows - 1].addNeighbour(cells[nbRows - 1][nbRows - 2]);
             return cells;
         }
+
+        @Override
+        public int getWidth() {
+            return (cells_.length);
+        }
+
+        @Override
+        public int getHeight() {
+            return (getWidth());
+        }
     }
 
     @Override
@@ -105,6 +115,10 @@ public abstract class Geometry implements Iterable<Cell> {
     public Cell[][] getCells() {
         return cells_.clone();
     }
+    
+    public abstract int getWidth();
+    
+    public abstract int getHeight();
 
     @Override
     public Iterator<Cell> iterator() {
