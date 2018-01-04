@@ -90,7 +90,7 @@ public class GameOfLifeGUI extends javax.swing.JFrame {
                         int y = j * size;
                         Cell cell = cells_[i][j];
                         if (cell.isAlive()) {
-                            g.setPaint(Color.YELLOW);
+                            g.setPaint(Color.MAGENTA);
                         } else {
                             g.setPaint(Color.WHITE);
                         }
@@ -122,8 +122,7 @@ public class GameOfLifeGUI extends javax.swing.JFrame {
             @Override
             protected Integer doInBackground() throws Exception {
                 it_ = 0;
-                gol_.setGeometry(new Geometry.Square(sizeSlider_.getValue()));
-                System.out.println(sizeSlider_.getValue());
+                gol_.setGeometry(new Geometry.Rectangle(sizeSlider_.getValue(), sizeSlider_.getValue()));
                 gol_.setRandomInitialSeed();
                 publish(gol_.getGeometry().getCells());
                 return it_;
