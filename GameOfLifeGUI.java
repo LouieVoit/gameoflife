@@ -21,20 +21,27 @@ public class GameOfLifeGUI extends javax.swing.JFrame {
     private final GameOfLife gol_;
     private javax.swing.JButton initButton_, tickButton_, playButton_, stopButton_, exitButton_;
     private javax.swing.JSlider sizeSlider_;
-    private JPanel golPanel_;
+    private GeometryPanel golPanel_;
 
     public GameOfLifeGUI() {
-        initComponents();
         gol_ = new GameOfLife();
+        gol_.setRandomInitialSeed();
+        initComponents();
     }
 
     private void initComponents() {
+        int golPanelHeight = 900;
+        int golPanelWidth = 900;
+        golPanel_ = new GeometryPanel(golPanelHeight, golPanelWidth);
+        golPanel_.setGeometry(gol_.getGeometry());
+        add(golPanel_, BorderLayout.CENTER);
+        
         initButton_ = new javax.swing.JButton();
         tickButton_ = new javax.swing.JButton();
         playButton_ = new javax.swing.JButton();
         stopButton_ = new javax.swing.JButton();
         exitButton_ = new javax.swing.JButton();
-        sizeSlider_ = new javax.swing.JSlider(JSlider.HORIZONTAL, 5, 100, 20);
+        sizeSlider_ = new javax.swing.JSlider(JSlider.HORIZONTAL, 10, 300, 20);
         initButton_.setText("Init");
         initButton_.addActionListener((java.awt.event.ActionEvent evt) -> {
             jToggleInitButtonActionPerformed(evt);
@@ -63,12 +70,7 @@ public class GameOfLifeGUI extends javax.swing.JFrame {
         buttons.add(exitButton_);
         buttons.add(sizeSlider_);
         buttons.setComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);
-
-        golPanel_ = new JPanel();
-        golPanel_.setPreferredSize(new Dimension(800, 800));
-
         add(buttons, BorderLayout.SOUTH);
-        add(golPanel_, BorderLayout.CENTER);
 
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -76,28 +78,13 @@ public class GameOfLifeGUI extends javax.swing.JFrame {
         pack();
     }
 
-    private abstract class GameOfLifeSwingWorker extends SwingWorker<Integer, Cell[][]> {
+    private abstract class GameOfLifeSwingWorker extends SwingWorker<Integer, Geometry> {
 
         @Override
-        protected void process(java.util.List<Cell[][]> chunks) {
-            Graphics2D g = (Graphics2D) golPanel_.getGraphics();
-            g.setPaint(Color.GRAY);
-            int size = (int) golPanel_.getPreferredSize().getWidth() / gol_.getGeometry().getWidth();
-            for (Cell[][] cells_ : chunks) {
-                for (int i = 0; i < cells_.length; i++) {
-                    for (int j = 0; j < cells_[i].length; j++) {
-                        int x = i * size;
-                        int y = j * size;
-                        Cell cell = cells_[i][j];
-                        if (cell.isAlive()) {
-                            g.setPaint(Color.MAGENTA);
-                        } else {
-                            g.setPaint(Color.WHITE);
-                        }
-                        g.fillRect(x, y, size, size);
-                    }
-
-                }
+        protected void process(java.util.List<Geometry> chunks) {
+            for (Geometry geometry : chunks) {
+                golPanel_.setGeometry(geometry);
+                golPanel_.repaint();
             }
         }
 
@@ -124,7 +111,7 @@ public class GameOfLifeGUI extends javax.swing.JFrame {
                 it_ = 0;
                 gol_.setGeometry(new Geometry.Rectangle(sizeSlider_.getValue(), sizeSlider_.getValue()));
                 gol_.setRandomInitialSeed();
-                publish(gol_.getGeometry().getCells());
+                publish(gol_.getGeometry());
                 return it_;
             }
 
@@ -137,9 +124,9 @@ public class GameOfLifeGUI extends javax.swing.JFrame {
 
             @Override
             protected Integer doInBackground() throws Exception {
-                it_ ++;
+                it_++;
                 gol_.nextGeneration(new Strategy.Default());
-                publish(gol_.getGeometry().getCells());
+                publish(gol_.getGeometry());
                 return it_;
             }
 
@@ -158,7 +145,7 @@ public class GameOfLifeGUI extends javax.swing.JFrame {
                 boolean isEvolving = true;
                 while (!isCancelled() && isEvolving) {
                     isEvolving = gol_.nextGeneration(new Strategy.Default());
-                    publish(gol_.getGeometry().getCells());
+                    publish(gol_.getGeometry());
                     TimeUnit.MILLISECONDS.sleep(100);
                     it_++;
                 }

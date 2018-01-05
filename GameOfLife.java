@@ -9,7 +9,11 @@ import gameoflife.Cell.State;
 public class GameOfLife {
 
     private Geometry geometry_;
-    
+
+    public GameOfLife() {
+        geometry_ = new Geometry.Rectangle(10, 10);
+    }
+
     public void setGeometry(Geometry geometry) {
         geometry_ = geometry;
     }
@@ -34,7 +38,7 @@ public class GameOfLife {
         }
         return hasEvolved;
     }
-    
+
     public Geometry getGeometry() {
         return geometry_;
     }
