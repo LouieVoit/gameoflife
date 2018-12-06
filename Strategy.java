@@ -1,36 +1,30 @@
-package gameoflife;
-
-import gameoflife.Cell.State;
-import static gameoflife.Cell.State.Alive;
-import static gameoflife.Cell.State.Dead;
-
 /**
  *
  * @author Loux
  */
 public abstract class Strategy {
 
-    public abstract State nextState(Cell cell);
+    public abstract Cell.State nextState(Cell cell);
 
     public static class Default extends Strategy {
 
         @Override
-        public State nextState(Cell cell) {
+        public Cell.State nextState(Cell cell) {
             int numberOfAliveNeighbours = cell.getNumberOfAliveNeighbours();
-            State result = cell.getState();
+            Cell.State result = cell.getState();
             switch (result) {
                 case Alive:
                     if (numberOfAliveNeighbours < 2) {
-                        result = Dead;
+                        result = Cell.State.Dead;
                     } else if (numberOfAliveNeighbours == 2 || numberOfAliveNeighbours == 3) {
-                        result = Alive;
+                        result = Cell.State.Alive;
                     } else {
-                        result = Dead;
+                        result = Cell.State.Dead;
                     }
                     break;
                 case Dead:
                     if (numberOfAliveNeighbours == 3) {
-                        result = Alive;
+                        result = Cell.State.Alive;
                     }
                     break;
             }

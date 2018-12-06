@@ -1,6 +1,3 @@
-package gameoflife;
-
-import static gameoflife.Cell.State.Dead;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +27,7 @@ public class Cell {
 
     public Cell() {
         neighbours_ = new ArrayList<>();
-        state_ = Dead;
+        state_ = State.Dead;
     }
 
     public void addNeighbour(Cell neighbour) {

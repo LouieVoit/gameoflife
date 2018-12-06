@@ -1,5 +1,3 @@
-package gameoflife;
-
 import java.awt.FlowLayout;
 import java.awt.*;
 import javax.swing.*;
@@ -10,7 +8,6 @@ import java.util.logging.Logger;
 import javax.swing.JPanel;
 import static javax.swing.SwingUtilities.invokeLater;
 import javax.swing.SwingWorker;
-import javax.swing.plaf.basic.BasicSliderUI;
 
 /**
  *

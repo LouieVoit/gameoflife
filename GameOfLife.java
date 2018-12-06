@@ -1,7 +1,3 @@
-package gameoflife;
-
-import gameoflife.Cell.State;
-
 /**
  *
  * @author Loux
@@ -11,7 +7,7 @@ public class GameOfLife {
     private Geometry geometry_;
 
     public GameOfLife() {
-        geometry_ = new Geometry.Rectangle(10, 10);
+        geometry_ = new Geometry.Rectangle(100, 100);
     }
 
     public void setGeometry(Geometry geometry) {
@@ -29,7 +25,7 @@ public class GameOfLife {
 
     public boolean nextGeneration(Strategy strategy) {
         for (Cell cell : geometry_) {
-            State nextState = strategy.nextState(cell);
+            Cell.State nextState = strategy.nextState(cell);
             cell.setNextState(nextState);
         }
         boolean hasEvolved = false;
