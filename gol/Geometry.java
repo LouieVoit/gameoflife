@@ -1,5 +1,12 @@
+package gol;
+
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.Arrays;
 import java.util.Iterator;
+import javax.swing.JPanel;
 
 /**
  *
@@ -7,20 +14,20 @@ import java.util.Iterator;
  */
 public abstract class Geometry implements Iterable<Cell> {
 
-    protected Cell[][][] cells_;
+    protected Cell[][][] cells;
 
     public static class Rectangle extends Geometry {
 
-        private final int nbRows_, nbColumns_;
+        private final int nbRows, nbColumns;
 
         public Rectangle(int nbRows, int nbColumns) {
-            nbRows_ = nbRows;
-            nbColumns_ = nbColumns;
-            cells_ = constructCells(nbRows, nbColumns);
+            this.nbRows = nbRows;
+            this.nbColumns = nbColumns;
+            cells = constructCells(nbRows, nbColumns);
         }
 
         private Cell[][][] constructCells(int nbRows, int nbColumns) {
-            Cell[][] cells2D = new Cell[nbRows][nbRows];
+            Cell[][] cells2D = new Cell[nbRows][nbColumns];
             for (int row = 0; row < nbRows; row++) {
                 cells2D[row][0] = new Cell();
                 cells2D[row][nbColumns - 1] = new Cell();
@@ -96,12 +103,12 @@ public abstract class Geometry implements Iterable<Cell> {
 
         @Override
         public int getWidth() {
-            return nbRows_;
+            return nbColumns;
         }
 
         @Override
         public int getHeight() {
-            return nbColumns_;
+            return nbRows;
         }
 
         @Override
@@ -115,7 +122,7 @@ public abstract class Geometry implements Iterable<Cell> {
         StringBuilder builder = new StringBuilder();
         for (int layer = 0; layer < getDepth(); layer++) {
             for (int row = 0; row < getHeight(); row++) {
-                builder.append(Arrays.toString(cells_[layer][row]));
+                builder.append(Arrays.toString(cells[layer][row]));
                 builder.append("\n");
             }
             builder.append("\n");
@@ -124,7 +131,7 @@ public abstract class Geometry implements Iterable<Cell> {
     }
 
     public Cell[][][] getCells() {
-        return cells_.clone();
+        return cells.clone();
     }
 
     public abstract int getWidth();
@@ -145,7 +152,7 @@ public abstract class Geometry implements Iterable<Cell> {
 
             @Override
             public Cell next() {
-                Cell next = cells_[layer_][row_][column_];
+                Cell next = cells[layer_][row_][column_];
                 column_ = (column_ + 1) % getWidth();
                 if (column_ == 0) {
                     row_ = (row_ + 1) % getHeight();
