@@ -1,12 +1,8 @@
 package gol;
 
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.util.Arrays;
 import java.util.Iterator;
-import javax.swing.JPanel;
 
 /**
  *
