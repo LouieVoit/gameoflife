@@ -7,7 +7,7 @@ public class GameOfLife {
     public static final void randomInitialize(Geometry geometry) {
         Random random = new Random();
         for (Cell cell : geometry) {
-//            if (random.nextInt(100) > 10) {
+//            if (random.nextInt(100) > 98) {
             if (random.nextBoolean()) {
                 cell.setState(Cell.State.Alive);
             }

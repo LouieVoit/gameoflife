@@ -22,37 +22,6 @@ import javax.swing.SwingWorker;
  */
 public class GameOfLifeJFrame extends javax.swing.JFrame {
 
-    private final class GameOfLifeJPanel extends JPanel {
-
-        @Override
-        public void paint(Graphics g) {
-            super.paint(g);
-            Graphics2D g2D = (Graphics2D) g;
-            g2D.setPaint(Color.GRAY);
-            int cellHeight = this.getHeight() / geometry.getHeight();
-            int cellWidth = this.getWidth() / geometry.getWidth();
-            for (int layer = 0; layer < geometry.getDepth(); layer++) {
-                for (int row = 0; row < geometry.getHeight(); row++) {
-                    int y = row * cellHeight;
-                    for (int column = 0; column < geometry.getWidth(); column++) {
-                        int x = column * cellWidth;
-                        Cell cell = geometry.getCells()[layer][row][column];
-                        if (cell.isAlive()) {
-                            g2D.setPaint(Color.WHITE);
-                        } else {
-                            g2D.setPaint(Color.BLACK);
-                        }
-                        g2D.fillRect(x, y, cellWidth, cellHeight);
-                    }
-                }
-            }
-        }
-    }
-
-    private Geometry geometry;
-    private int it_;
-    private GameOfLifeSwingWorker gameOfLifeSwingWorker;
-
     /**
      * Creates new form GameOfLifeJFrame
      */
@@ -60,7 +29,7 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
         geometry = new Geometry.Rectangle(200, 200);
         GameOfLife.randomInitialize(geometry);
         it_ = 0;
-        gameOfLifeSwingWorker = new GameOfLifeSwingWorker(this);
+        gameOfLifeSwingWorker = null;
         initComponents();
     }
 
@@ -103,26 +72,37 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
-        if (evt.getKeyChar() == 'p') {
-            gameOfLifeSwingWorker.cancel(true);
-        } else if (evt.getKeyChar() == 's') {
-            java.awt.EventQueue.invokeLater(() -> {
-                if (gameOfLifeSwingWorker.isCancelled()) {
-                    gameOfLifeSwingWorker = new GameOfLifeSwingWorker(this);
+        switch (evt.getKeyChar()) {
+            case 'p':
+                if (gameOfLifeSwingWorker != null) {
+                    gameOfLifeSwingWorker.cancel(true);
                 }
-                gameOfLifeSwingWorker.execute();
-            });
-        } else if (evt.getKeyChar() == 'i') {
-            java.awt.EventQueue.invokeLater(() -> {
-                gameOfLifeSwingWorker.cancel(true);
+                break;
+            case 's':
+                if (gameOfLifeSwingWorker == null || gameOfLifeSwingWorker.isCancelled()) {
+                    gameOfLifeSwingWorker = new GameOfLifeSwingWorker(this);
+                    java.awt.EventQueue.invokeLater(() -> {
+                        gameOfLifeSwingWorker.execute();
+                    });
+                }
+                break;
+            case 'i':
+                if (gameOfLifeSwingWorker != null) {
+                    gameOfLifeSwingWorker.cancel(true);
+                }
                 geometry = new Geometry.Rectangle(200, 200);
                 GameOfLife.randomInitialize(geometry);
-                gameOfLifeSwingWorker = new GameOfLifeSwingWorker(this);
                 jPanel1.repaint();
-            });
+                break;
+            default:
+                break;
         }
     }//GEN-LAST:event_formKeyPressed
 
+    private void pause() {
+        
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -157,6 +137,33 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
         });
     }
 
+    private final class GameOfLifeJPanel extends JPanel {
+
+        @Override
+        public void paint(Graphics g) {
+            super.paint(g);
+            Graphics2D g2D = (Graphics2D) g;
+            g2D.setPaint(Color.GRAY);
+            int cellHeight = this.getHeight() / geometry.getHeight();
+            int cellWidth = this.getWidth() / geometry.getWidth();
+            for (int layer = 0; layer < geometry.getDepth(); layer++) {
+                for (int row = 0; row < geometry.getHeight(); row++) {
+                    int y = row * cellHeight;
+                    for (int column = 0; column < geometry.getWidth(); column++) {
+                        int x = column * cellWidth;
+                        Cell cell = geometry.getCells()[layer][row][column];
+                        if (cell.isAlive()) {
+                            g2D.setPaint(Color.WHITE);
+                        } else {
+                            g2D.setPaint(Color.BLACK);
+                        }
+                        g2D.fillRect(x, y, cellWidth, cellHeight);
+                    }
+                }
+            }
+        }
+    }
+
     private static class GameOfLifeSwingWorker extends SwingWorker<Integer, Geometry> {
 
         protected final GameOfLifeJFrame gameOfLifeJFrame;
@@ -177,7 +184,7 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
         protected void done() {
             try {
                 if (!isCancelled()) {
-                    System.out.println(get());
+                    System.out.println("stationary state reached in " + get() + " iterations.");
                 }
             } catch (InterruptedException | ExecutionException ex) {
                 Logger.getLogger(GameOfLifeJFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -196,6 +203,10 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
             return this.gameOfLifeJFrame.it_;
         }
     }
+
+    private Geometry geometry;
+    private int it_;
+    private GameOfLifeSwingWorker gameOfLifeSwingWorker;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
