@@ -1,18 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package gol;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
@@ -46,6 +43,7 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("This is the game of life");
+        setPreferredSize(new java.awt.Dimension(800, 800));
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 formKeyPressed(evt);
@@ -59,13 +57,13 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
                 .addGap(0, 0, 0))
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
         );
 
         pack();
@@ -90,19 +88,45 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
                 if (gameOfLifeSwingWorker != null) {
                     gameOfLifeSwingWorker.cancel(true);
                 }
-                geometry = new Geometry.Rectangle(200, 200);
                 GameOfLife.randomInitialize(geometry);
                 jPanel1.repaint();
+                break;
+            case 'n':
+                if (gameOfLifeSwingWorker != null) {
+                    gameOfLifeSwingWorker.cancel(true);
+                }
+                String s = JOptionPane.showInputDialog(jPanel1, "Stupid, fucking white man,\n"
+                        + "change the number of cells along the horizontal and vertical directions.",
+                        "Format ex.: 100x100");
+                if (s != null && s.length() > 0) {
+                    String[] split = s.split("x");
+                    if (split.length == 2) {
+                        try {
+                            int nbColumns = Integer.parseInt(split[0]);
+                            int nbRows = Integer.parseInt(split[1]);
+                            geometry = new Geometry.Rectangle(nbRows, nbColumns);
+                            GameOfLife.randomInitialize(geometry);
+                            jPanel1.repaint();
+                        } catch (NumberFormatException ex) {
+                            java.util.logging.Logger.getLogger(GameOfLifeJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                                new RuntimeException("Invalid input format for game of life size,\n"
+                                        + "it should be the number of cells along the horizontal x the number of cells along vertical directions,\n"
+                                        + "was given " + s));
+                        }
+                    } else {
+                        java.util.logging.Logger.getLogger(GameOfLifeJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                                new RuntimeException("Invalid input for game of life size, was given " + s));
+                    }
+                } else {
+                    java.util.logging.Logger.getLogger(GameOfLifeJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null,
+                            new RuntimeException("Null input size."));
+                }
                 break;
             default:
                 break;
         }
     }//GEN-LAST:event_formKeyPressed
 
-    private void pause() {
-        
-    }
-    
     /**
      * @param args the command line arguments
      */
@@ -139,13 +163,25 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
 
     private final class GameOfLifeJPanel extends JPanel {
 
+        public GameOfLifeJPanel() {
+            addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    System.out.println("mouse clicked in gol panel");
+                    System.out.println(e.getPoint());
+                    System.out.println(e.getLocationOnScreen());
+                }
+
+            });
+        }
+
         @Override
         public void paint(Graphics g) {
             super.paint(g);
             Graphics2D g2D = (Graphics2D) g;
             g2D.setPaint(Color.GRAY);
-            int cellHeight = this.getHeight() / geometry.getHeight();
-            int cellWidth = this.getWidth() / geometry.getWidth();
+            int cellHeight = (int) Math.ceil((double) this.getHeight() / geometry.getHeight());
+            int cellWidth = (int) Math.ceil((double) this.getWidth() / geometry.getWidth());
             for (int layer = 0; layer < geometry.getDepth(); layer++) {
                 for (int row = 0; row < geometry.getHeight(); row++) {
                     int y = row * cellHeight;

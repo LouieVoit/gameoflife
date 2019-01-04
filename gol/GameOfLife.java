@@ -10,6 +10,8 @@ public class GameOfLife {
 //            if (random.nextInt(100) > 98) {
             if (random.nextBoolean()) {
                 cell.setState(Cell.State.Alive);
+            } else {
+                cell.setState(Cell.State.Dead);
             }
         }
     }
