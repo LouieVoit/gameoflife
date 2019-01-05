@@ -56,6 +56,10 @@ public class Cell {
         nextState_ = null;
         return hasEvolved;
     }
+    
+    public void switchState() {
+        state_ = state_.equals(State.Alive) ? State.Dead : State.Alive;
+    }
 
     public boolean isAlive() {
         return getState().equals(State.Alive);

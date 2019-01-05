@@ -98,6 +98,7 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
                 String s = JOptionPane.showInputDialog(jPanel1, "Stupid, fucking white man,\n"
                         + "change the number of cells along the horizontal and vertical directions.",
                         "Format ex.: 100x100");
+                String msg = "Problem while key pressed.";
                 if (s != null && s.length() > 0) {
                     String[] split = s.split("x");
                     if (split.length == 2) {
@@ -108,18 +109,19 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
                             GameOfLife.randomInitialize(geometry);
                             jPanel1.repaint();
                         } catch (NumberFormatException ex) {
-                            java.util.logging.Logger.getLogger(GameOfLifeJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null,
-                                new RuntimeException("Invalid input format for game of life size,\n"
-                                        + "it should be the number of cells along the horizontal x the number of cells along vertical directions,\n"
-                                        + "was given " + s));
+                            msg += "Invalid input format for game of life size,\n"
+                                    + "it should be the number of cells along the horizontal x the number of cells along vertical directions,\n"
+                                    + "was given " + s + "\n";
+                            msg += ex.getMessage();
                         }
                     } else {
-                        java.util.logging.Logger.getLogger(GameOfLifeJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null,
-                                new RuntimeException("Invalid input for game of life size, was given " + s));
+                        msg += "Invalid input for game of life size, was given \"" + s + "\"";
                     }
                 } else {
-                    java.util.logging.Logger.getLogger(GameOfLifeJFrame.class.getName()).log(java.util.logging.Level.SEVERE, null,
-                            new RuntimeException("Null input size."));
+                    msg += "Null input size.";
+                }
+                if (msg.length() > 26) {
+                    java.util.logging.Logger.getLogger(GameOfLifeJFrame.class.getName()).log(java.util.logging.Level.WARNING, msg);
                 }
                 break;
             default:
@@ -167,12 +169,28 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
             addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    System.out.println("mouse clicked in gol panel");
-                    System.out.println(e.getPoint());
-                    System.out.println(e.getLocationOnScreen());
+                    formMouseClicked(e);
                 }
 
             });
+        }
+
+        private void formMouseClicked(MouseEvent e) {
+            Cell cell = getCell(e.getPoint());
+            cell.switchState();
+            GameOfLifeJPanel.this.repaint();
+        }
+
+        public Cell getCell(java.awt.Point point) {
+            Cell cell = null;
+            int cellHeight = getCellHeight();
+            int cellWidth = getCellWidth();
+            double y = point.getY();
+            double x = point.getX();
+            int row = (int) y / cellHeight;
+            int column = (int) x / cellWidth;
+            cell = geometry.getCells()[0][row][column];
+            return cell;
         }
 
         @Override
@@ -180,8 +198,8 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
             super.paint(g);
             Graphics2D g2D = (Graphics2D) g;
             g2D.setPaint(Color.GRAY);
-            int cellHeight = (int) Math.ceil((double) this.getHeight() / geometry.getHeight());
-            int cellWidth = (int) Math.ceil((double) this.getWidth() / geometry.getWidth());
+            int cellHeight = getCellHeight();
+            int cellWidth = getCellWidth();
             for (int layer = 0; layer < geometry.getDepth(); layer++) {
                 for (int row = 0; row < geometry.getHeight(); row++) {
                     int y = row * cellHeight;
@@ -197,6 +215,14 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
                     }
                 }
             }
+        }
+
+        private int getCellHeight() {
+            return ((int) Math.ceil((double) this.getHeight() / geometry.getHeight()));
+        }
+
+        private int getCellWidth() {
+            return ((int) Math.ceil((double) this.getWidth() / geometry.getWidth()));
         }
     }
 
