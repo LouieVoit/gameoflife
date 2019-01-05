@@ -25,8 +25,8 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
     public GameOfLifeJFrame() {
         geometry = new Geometry.Rectangle(200, 200);
         GameOfLife.randomInitialize(geometry);
-        it_ = 0;
-        gameOfLifeSwingWorker = null;
+        gameOfLifeSwingWorker = new GameOfLifeSwingWorker();
+        gameOfLifeSwingWorker.cancel(true);
         initComponents();
     }
 
@@ -40,6 +40,8 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("This is the game of life");
@@ -50,52 +52,57 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
             }
         });
 
+        jPanel1.setBackground(new java.awt.Color(0, 0, 0));
+        jPanel1.setPreferredSize(new java.awt.Dimension(200, 800));
+        jPanel1.setRequestFocusEnabled(false);
         jPanel1.setLayout(new java.awt.BorderLayout());
-        jPanel1.add(new GameOfLifeJPanel(), BorderLayout.CENTER);
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
-                .addGap(0, 0, 0))
+        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel3.setPreferredSize(new java.awt.Dimension(10, 800));
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 10, Short.MAX_VALUE)
         );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 800, Short.MAX_VALUE)
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 800, Short.MAX_VALUE)
         );
+
+        jPanel1.add(jPanel3, java.awt.BorderLayout.EAST);
+
+        getContentPane().add(jPanel1, java.awt.BorderLayout.WEST);
+
+        jPanel2.setPreferredSize(new java.awt.Dimension(1000, 800));
+        jPanel2.setLayout(new java.awt.BorderLayout());
+        jPanel2.add(new GameOfLifeJPanel(), BorderLayout.CENTER);
+        getContentPane().add(jPanel2, java.awt.BorderLayout.CENTER);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void formKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyPressed
         switch (evt.getKeyChar()) {
-            case 'p':
-                if (gameOfLifeSwingWorker != null) {
-                    gameOfLifeSwingWorker.cancel(true);
-                }
+            case 'i':
+                gameOfLifeSwingWorker.cancel(true);
+                GameOfLife.randomInitialize(geometry);
+                jPanel2.repaint();
                 break;
-            case 's':
-                if (gameOfLifeSwingWorker == null || gameOfLifeSwingWorker.isCancelled()) {
-                    gameOfLifeSwingWorker = new GameOfLifeSwingWorker(this);
+            case ' ':
+                if (gameOfLifeSwingWorker.isDone()) {
+                    gameOfLifeSwingWorker = new GameOfLifeSwingWorker();
                     java.awt.EventQueue.invokeLater(() -> {
                         gameOfLifeSwingWorker.execute();
                     });
-                }
-                break;
-            case 'i':
-                if (gameOfLifeSwingWorker != null) {
+                } else {
                     gameOfLifeSwingWorker.cancel(true);
                 }
-                GameOfLife.randomInitialize(geometry);
-                jPanel1.repaint();
                 break;
             case 'n':
-                if (gameOfLifeSwingWorker != null) {
-                    gameOfLifeSwingWorker.cancel(true);
-                }
-                String s = JOptionPane.showInputDialog(jPanel1, "Stupid, fucking white man,\n"
+                gameOfLifeSwingWorker.cancel(true);
+                String s = JOptionPane.showInputDialog(jPanel2, "Stupid, fucking white man,\n"
                         + "change the number of cells along the horizontal and vertical directions.",
                         "Format ex.: 100x100");
                 String msg = "Problem while key pressed.";
@@ -107,7 +114,7 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
                             int nbRows = Integer.parseInt(split[1]);
                             geometry = new Geometry.Rectangle(nbRows, nbColumns);
                             GameOfLife.randomInitialize(geometry);
-                            jPanel1.repaint();
+                            jPanel2.repaint();
                         } catch (NumberFormatException ex) {
                             msg += "Invalid input format for game of life size,\n"
                                     + "it should be the number of cells along the horizontal x the number of cells along vertical directions,\n"
@@ -226,20 +233,16 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
         }
     }
 
-    private static class GameOfLifeSwingWorker extends SwingWorker<Integer, Geometry> {
+    private class GameOfLifeSwingWorker extends SwingWorker<Integer, Geometry> {
 
-        protected final GameOfLifeJFrame gameOfLifeJFrame;
-
-        public GameOfLifeSwingWorker(GameOfLifeJFrame gameOfLifeJFrame) {
-            this.gameOfLifeJFrame = gameOfLifeJFrame;
-        }
-
+        private int it_;
+        
         @Override
         protected void process(java.util.List<Geometry> chunks) {
             for (Geometry geometry : chunks) {
 //                this.gameOfLifeJFrame.jPanel1.repaint();
             }
-            this.gameOfLifeJFrame.jPanel1.repaint();
+            jPanel2.repaint();
         }
 
         @Override
@@ -257,20 +260,21 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
         protected Integer doInBackground() throws Exception {
             boolean isEvolving = true;
             while (!isCancelled() && isEvolving) {
-                isEvolving = GameOfLife.nextGeneration(this.gameOfLifeJFrame.geometry, new Strategy.Default());
-                publish(this.gameOfLifeJFrame.geometry);
-                TimeUnit.MILLISECONDS.sleep(100);
-                this.gameOfLifeJFrame.it_++;
+                isEvolving = GameOfLife.nextGeneration(geometry, new Strategy.Default());
+                publish(geometry);
+                it_++;
+                TimeUnit.MILLISECONDS.sleep(200);
             }
-            return this.gameOfLifeJFrame.it_;
+            return it_;
         }
     }
 
     private Geometry geometry;
-    private int it_;
     private GameOfLifeSwingWorker gameOfLifeSwingWorker;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     // End of variables declaration//GEN-END:variables
 }
