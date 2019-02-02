@@ -40,12 +40,16 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        jPanel3 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 0), new java.awt.Dimension(10, 32767));
+        jLabel3 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("This is the game of life");
-        setPreferredSize(new java.awt.Dimension(800, 800));
+        setPreferredSize(new java.awt.Dimension(1000, 800));
+        setResizable(false);
         addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 formKeyPressed(evt);
@@ -55,27 +59,31 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
         jPanel1.setBackground(new java.awt.Color(0, 0, 0));
         jPanel1.setPreferredSize(new java.awt.Dimension(200, 800));
         jPanel1.setRequestFocusEnabled(false);
-        jPanel1.setLayout(new java.awt.BorderLayout());
+        jPanel1.setLayout(new javax.swing.BoxLayout(jPanel1, javax.swing.BoxLayout.Y_AXIS));
 
-        jPanel3.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel3.setPreferredSize(new java.awt.Dimension(10, 800));
+        jLabel1.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
+        jLabel1.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel1.setText("<html><b>Here are the instructions !</b><br/><br/> <b>White</b> cells are <b>alive</b>  <br/><b> Black</b> cells are <b>dead</b>  <br/><br/><i>`i'</i> : initialize the game<br/> <i>`space'</i>  : pause/resume the game<br/> <i>`n'</i>  : change the size of the game <br/><br/>A click on a cell will turn a dead cell alive, and <i>vice versa</i></html>");
+        jLabel1.setAlignmentX(0.5F);
+        jPanel1.add(jLabel1);
+        jPanel1.add(filler1);
 
-        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
-        jPanel3.setLayout(jPanel3Layout);
-        jPanel3Layout.setHorizontalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 10, Short.MAX_VALUE)
-        );
-        jPanel3Layout.setVerticalGroup(
-            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 800, Short.MAX_VALUE)
-        );
+        jLabel3.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
+        jLabel3.setForeground(new java.awt.Color(240, 240, 240));
+        jLabel3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel3.setText("<html><i>\"Stupid fucking white man\"</i>,<br/> DEAD MAN 1995 - Jim Jarmusch </html>");
+        jLabel3.setAlignmentX(0.5F);
+        jPanel1.add(jLabel3);
 
-        jPanel1.add(jPanel3, java.awt.BorderLayout.EAST);
+        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/gol/fixed-480w.png"))); // NOI18N
+        jLabel2.setAlignmentX(0.5F);
+        jPanel1.add(jLabel2);
 
         getContentPane().add(jPanel1, java.awt.BorderLayout.WEST);
 
-        jPanel2.setPreferredSize(new java.awt.Dimension(1000, 800));
+        jPanel2.setPreferredSize(new java.awt.Dimension(800, 800));
         jPanel2.setLayout(new java.awt.BorderLayout());
         jPanel2.add(new GameOfLifeJPanel(), BorderLayout.CENTER);
         getContentPane().add(jPanel2, java.awt.BorderLayout.CENTER);
@@ -273,8 +281,11 @@ public class GameOfLifeJFrame extends javax.swing.JFrame {
     private GameOfLifeSwingWorker gameOfLifeSwingWorker;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.Box.Filler filler1;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     // End of variables declaration//GEN-END:variables
 }
